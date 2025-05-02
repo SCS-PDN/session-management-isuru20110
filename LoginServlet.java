@@ -1,19 +1,33 @@
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
+import java.io.*;
+import javax.servlet.*;
 import javax.servlet.http.*;
+import java.util.*;
 
-@WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    private Map<String, String> users = new HashMap<>();
+
+    public void init() {
+        users.put("yourname01", "yourpass01");
+        users.put("testuser02", "testpass02");
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // TODO: Implement login logic
-        // 1. Get username & password from request
-        // 2. Validate credentials (hardcode a few users)
-        // 3. If valid:
-        //    - Create session
-        //    - Store username in cookie
-        //    - Redirect to DashboardServlet
-        // 4. If invalid, redirect back to login.html
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        if (users.containsKey(username) && users.get(username).equals(password)) {
+            HttpSession session = request.getSession();
+            session.setAttribute("username", username);
+
+            Cookie cookie = new Cookie("username", username);
+            cookie.setMaxAge(3600); // 1 hour
+            response.addCookie(cookie);
+
+            response.sendRedirect("DashboardServlet");
+        } else {
+            response.sendRedirect("login.html");
+        }
     }
 }
